@@ -28,6 +28,7 @@ module.exports = function leafletImage(map, callback) {
 
     // layers are drawn in the same order as they are composed in the DOM:
     // tiles, paths, and then markers
+    map.eachLayer(drawImageOverlayLayer);
     map.eachLayer(drawTileLayer);
     map.eachLayer(drawEsriDynamicLayer);
     
@@ -40,6 +41,9 @@ module.exports = function leafletImage(map, callback) {
     map.eachLayer(drawMarkerLayer);
     layerQueue.awaitAll(layersDone);
 
+    function drawImageOverlayLayer(l){
+        if(l instanceof L.ImageOverlay) layerQueue.defer(handleImageOverlay, l);
+    }
     function drawTileLayer(l) {
         if (l instanceof L.TileLayer) layerQueue.defer(handleTileLayer, l);
         else if (l._heat) layerQueue.defer(handlePathRoot, l._canvas);
@@ -73,6 +77,9 @@ module.exports = function leafletImage(map, callback) {
         done();
     }
 
+    function handleImageOverlay(layer, callback){
+        console.log(layer);
+    }
     function handleTileLayer(layer, callback) {
         // `L.TileLayer.Canvas` was removed in leaflet 1.0
         var isCanvasLayer = (L.TileLayer.Canvas && layer instanceof L.TileLayer.Canvas),
